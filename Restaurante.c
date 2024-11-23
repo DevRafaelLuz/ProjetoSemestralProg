@@ -26,25 +26,79 @@ typedef struct {
     float total;
 } Pedido;
 
+int validarCPF(Cliente *cliente) { 
+    int i, j, soma, resto, digito1, digito2;
+    char *cpf = cliente->cpf; 
+    
+    if (strlen(cpf) != 11 || !isdigit(cpf[0])) return 0; 
+    
+    // Verificar se todos os dígitos são iguais 
+    for (i = 1; i < 11; i++) { 
+        if (cpf[i] != cpf[0]) break; 
+        if (i == 10) return 0; 
+    } 
+    
+    // Calcular o primeiro dígito verificador 
+    soma = 0; 
+    for (i = 0, j = 10; i < 9; i++, j--) { 
+        soma += (cpf[i] - '0') * j; 
+    } 
+    resto = soma % 11; 
+    digito1 = (resto < 2) ? 0 : 11 - resto; 
+
+    // Calcular o segundo dígito verificador 
+    soma = 0; 
+    for (i = 0, j = 11; i < 10; i++, j--) { 
+        soma += (cpf[i] - '0') * j; 
+    } 
+    resto = soma % 11; 
+    digito2 = (resto < 2) ? 0 : 11 - resto; 
+    
+    return (digito1 == (cpf[9] - '0') && digito2 == (cpf[10] - '0')); 
+}
+
 void cadastrarCliente() {
+    int opcao;
     Cliente cliente;
-    FILE *arquivo = fopen("clientes.txt", "a");
-    if (arquivo == NULL) {
-        return;
-    }
 
-    printf("ID do Cliente: ");
-    scanf("%d", &cliente.id);
-    printf("Nome do Cliente: ");
-    scanf("%s", cliente.nome);
-    printf("Telefone do Cliente: ");
-    scanf("%s", cliente.telefone);
-    printf("CPF do cliente: ");
-    scanf("%s", cliente.cpf);
-    cliente.ativo = 1;
+    do {
+        FILE *arquivo = fopen("clientes.txt", "a");
+        if (arquivo == NULL) {
+            return;
+        }
 
-    fprintf(arquivo, "%d %s %s %s %d\n", cliente.id, cliente.nome, cliente.telefone, cliente.cpf, cliente.ativo);
-    fclose(arquivo);
+        printf("ID do Cliente: ");
+        scanf("%d", &cliente.id);
+        printf("Nome do Cliente: ");
+        scanf("%s", cliente.nome);
+        printf("Telefone do Cliente: ");
+        scanf("%s", cliente.telefone);
+        printf("CPF do cliente: ");
+        scanf("%s", cliente.cpf);
+        cliente.ativo = 1;
+
+        if (validarCPF(&cliente)) {
+            fprintf(arquivo, "%d %s %s %s %d\n", cliente.id, cliente.nome, cliente.telefone, cliente.cpf, cliente.ativo);
+            system("cls");
+            printf("+-----------------------------------------+\n");
+            printf("|     Cliente Cadastrado com Sucesso!     |\n");
+            printf("+-----------------------------------------+\n");
+            printf("| 1. Cadastrar Novo Cliente               |\n");
+            printf("| 2. Voltar                               |\n");
+            printf("+-----------------------------------------+\n");
+        } else {
+            system("cls");
+            printf("+-----------------------------------------+\n");
+            printf("|  Nao foi possivel cadastrar o Cliente!  |\n");
+            printf("+-----------------------------------------+\n");
+            printf("| 1. Cadastrar Novamente                  |\n");
+            printf("| 2. Voltar                               |\n");
+            printf("+-----------------------------------------+\n");
+        }
+        printf("Escolha uma opcao: ");
+        scanf("%d", &opcao);
+        fclose(arquivo);
+    } while (opcao != 2);
 }
 
 void listarClientes() {
@@ -71,8 +125,7 @@ void listarClientes() {
                 printf("+-----------------------------------------+\n");
             }
         }
-        printf("+-----------------------------------------+\n");
-        printf("| 1. Voltar                               |\n ");
+        printf("| 1. Voltar                               |\n");
         printf("+-----------------------------------------+\n");
         scanf("%d", &opcao);
         fclose(arquivo);
@@ -211,7 +264,7 @@ void excluirCliente() {
                     }
                 }
                 printf("+-----------------------------------------+\n");
-                printf("| 1. Desativar outro Cliente              |\n");
+                printf("| 1. Excluir outro Cliente                |\n");
                 printf("| 2. Voltar                               |\n");
                 printf("+-----------------------------------------+\n");
                 printf("Escolha uma opcao: ");

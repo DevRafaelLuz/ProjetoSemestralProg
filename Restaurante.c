@@ -32,13 +32,11 @@ int validarCPF(Cliente *cliente) {
     
     if (strlen(cpf) != 11 || !isdigit(cpf[0])) return 0; 
     
-    // Verificar se todos os dígitos são iguais 
     for (i = 1; i < 11; i++) { 
         if (cpf[i] != cpf[0]) break; 
         if (i == 10) return 0; 
     } 
     
-    // Calcular o primeiro dígito verificador 
     soma = 0; 
     for (i = 0, j = 10; i < 9; i++, j--) { 
         soma += (cpf[i] - '0') * j; 
@@ -46,7 +44,6 @@ int validarCPF(Cliente *cliente) {
     resto = soma % 11; 
     digito1 = (resto < 2) ? 0 : 11 - resto; 
 
-    // Calcular o segundo dígito verificador 
     soma = 0; 
     for (i = 0, j = 11; i < 10; i++, j--) { 
         soma += (cpf[i] - '0') * j; 
@@ -101,12 +98,11 @@ void cadastrarCliente() {
     } while (opcao != 2);
 }
 
-void listarClientes() {
-    Cliente cliente;
+void listarClientes(const char* filename) {
     int opcao;
 
     do {
-        FILE *arquivo = fopen("clientes.txt", "r");
+        FILE *arquivo = fopen(filename, "r");
         if (arquivo == NULL) {
             return;
         }
@@ -115,18 +111,50 @@ void listarClientes() {
         printf("+-----------------------------------------+\n");
         printf("|            Lista de Clientes            |\n");
         printf("+-----------------------------------------+\n");
-        while (fscanf(arquivo, "%d %s %s %s %d\n", &cliente.id, cliente.nome, cliente.telefone, cliente.cpf, &cliente.ativo) != EOF) {
-            if (cliente.ativo) {
-                printf(" ID: %d\n", cliente.id);
-                printf(" Nome: %s\n", cliente.nome);
-                printf(" Telefone: %s\n", cliente.telefone);
-                printf(" CPF: %s\n", cliente.cpf);
-                printf(" Ativo: %d\n", cliente.ativo);
-                printf("+-----------------------------------------+\n");
+
+        Cliente *clientes = NULL;
+        size_t tamanho = 0;
+        size_t capacidade = 1;
+        clientes = malloc(capacidade * sizeof(Cliente));
+        if (clientes == NULL) {
+            fclose(arquivo);
+        }
+
+        while (fscanf(arquivo, "%d %s %s %s %d\n", &clientes[tamanho].id, clientes[tamanho].nome, clientes[tamanho].telefone, clientes[tamanho].cpf, &clientes[tamanho].ativo) != EOF) {
+            tamanho++;
+            if (tamanho == capacidade) {
+                capacidade *= 2;
+                Cliente *temp = realloc(clientes, capacidade * sizeof(Cliente));
+                if (temp == NULL) {
+                    free(clientes);
+                    fclose(arquivo);
+                }
+                clientes = temp;
             }
         }
+
+        for (size_t i = 0; i < tamanho - 1; i++) { 
+            for (size_t j = 0; j < tamanho - i - 1; j++) { 
+                if (strcmp(clientes[j].nome, clientes[j+1].nome) > 0) { 
+                    Cliente temp = clientes[j]; clientes[j] = clientes[j+1]; clientes[j+1] = temp; 
+                } 
+            } 
+        }
+
+        for (size_t i = 0; i < tamanho; i++) { 
+            printf(" ID: %d\n", clientes[i].id);
+            printf(" Nome: %s\n", clientes[i].nome);
+            printf(" Telefone: %s\n", clientes[i].telefone);
+            printf(" CPF: %s\n", clientes[i].cpf);
+            printf(" Ativo: %d\n", clientes[i].ativo);
+            printf("+-----------------------------------------+\n");
+        } 
+        
+        free(clientes);
+
         printf("| 1. Voltar                               |\n");
         printf("+-----------------------------------------+\n");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
         fclose(arquivo);
     } while (opcao != 1);
@@ -376,31 +404,65 @@ void registrarPedido() {
     } while (opcao != 2);
 }
 
-void consultarDisponibilidadePratos() {
+void consultarDisponibilidadePratos(const char* filename) {
     int opcao;
-    Prato prato;
+
     do {
-        FILE *arquivo = fopen("pratos.txt", "r");
+        FILE *arquivo = fopen(filename, "r");
         if (arquivo == NULL) {
             return;
         }
 
         system("cls");
-        printf("+-----------------------------------------+\n");
-        printf("|            Pratos Disponiveis           |\n");
-        printf("+-----------------------------------------+\n");
-        while (fscanf(arquivo, "%d %s %f %d\n", &prato.id, prato.nome, &prato.preco, &prato.disponibilidade) != EOF) {
-            if (prato.disponibilidade) {
-                printf(" ID: %d\n", prato.id);
-                printf(" Nome: %s\n", prato.nome);
-                printf(" Preco: %.2f\n", prato.preco);
-            }
-            printf("+-----------------------------------------+\n");
+        printf("+----------------------------------------+\n");
+        printf("|           Pratos Disponiveis           |\n");
+        printf("+----------------------------------------+\n");
+
+        Prato *pratos = NULL;
+        size_t tamanho = 0;
+        size_t capacidade = 1;
+        pratos = malloc(capacidade * sizeof(Prato));
+        if (pratos == NULL) {
+            fclose(arquivo);
         }
-        printf("Digite 0 para voltar ");
+
+        while (fscanf(arquivo, "%d %s %f %d\n", &pratos[tamanho].id, pratos[tamanho].nome, &pratos[tamanho].preco, &pratos[tamanho].disponibilidade) != EOF) {
+            tamanho++;
+            if (tamanho == capacidade) {
+                capacidade *= 2;
+                Prato *temp = realloc(pratos, capacidade * sizeof(Prato));
+                if (temp == NULL) {
+                    free(pratos);
+                    fclose(arquivo);
+                }
+                pratos = temp;
+            }
+        }
+
+        for (size_t i = 0; i < tamanho - 1; i++) { 
+            for (size_t j = 0; j < tamanho - i - 1; j++) { 
+                if (strcmp(pratos[j].nome, pratos[j+1].nome) > 0) { 
+                    Prato temp = pratos[j]; pratos[j] = pratos[j+1]; pratos[j+1] = temp; 
+                } 
+            } 
+        }
+
+        for (size_t i = 0; i < tamanho; i++) {
+            printf(" ID: %d\n", pratos[i].id);
+            printf(" Nome: %s\n", pratos[i].nome);
+            printf(" Preco: %.2f\n", pratos[i].preco);
+            printf(" Disponibilidade: %d\n", pratos[i].disponibilidade);
+            printf("+----------------------------------------+\n");
+        }
+
+        free(pratos);
+
+        printf("| 1. Voltar                               |\n");
+        printf("+-----------------------------------------+\n");
+        printf("Escolha uma opcao: ");
         scanf("%d", &opcao);
         fclose(arquivo);
-    } while (opcao != 0);
+    } while (opcao != 1);
 }
 
 void relatorioVendas() {
@@ -433,12 +495,11 @@ void relatorioVendas() {
     } while (opcao != 1);
 }
 
-void relatorioEstoque() {
+void relatorioEstoque(const char* filename) {
     int opcao;
-    Prato prato;
 
     do {
-        FILE *arquivo = fopen("pratos.txt", "r");
+        FILE *arquivo = fopen(filename, "r");
         if (arquivo == NULL) {
             return;
         }
@@ -447,13 +508,46 @@ void relatorioEstoque() {
         printf("+----------------------------------------+\n");
         printf("|          Relatorio de Estoque          |\n");
         printf("+----------------------------------------+\n");
-        while (fscanf(arquivo, "%d %s %f %d\n", &prato.id, prato.nome, &prato.preco, &prato.disponibilidade) != EOF) {
-            printf(" ID: %d\n", prato.id);
-            printf(" Nome: %s\n", prato.nome);
-            printf(" Preco: %.2f\n", prato.preco);
-            printf(" Disponibilidade: %d\n", prato.disponibilidade);
+
+        Prato *pratos = NULL;
+        size_t tamanho = 0;
+        size_t capacidade = 1;
+        pratos = malloc(capacidade * sizeof(Prato));
+        if (pratos == NULL) {
+            fclose(arquivo);
+        }
+
+        while (fscanf(arquivo, "%d %s %f %d\n", &pratos[tamanho].id, pratos[tamanho].nome, &pratos[tamanho].preco, &pratos[tamanho].disponibilidade) != EOF) {
+            tamanho++;
+            if (tamanho == capacidade) {
+                capacidade *= 2;
+                Prato *temp = realloc(pratos, capacidade * sizeof(Prato));
+                if (temp == NULL) {
+                    free(pratos);
+                    fclose(arquivo);
+                }
+                pratos = temp;
+            }
+        }
+
+        for (size_t i = 0; i < tamanho - 1; i++) { 
+            for (size_t j = 0; j < tamanho - i - 1; j++) { 
+                if (strcmp(pratos[j].nome, pratos[j+1].nome) > 0) { 
+                    Prato temp = pratos[j]; pratos[j] = pratos[j+1]; pratos[j+1] = temp; 
+                } 
+            } 
+        }
+
+        for (size_t i = 0; i < tamanho; i++) {
+            printf(" ID: %d\n", pratos[i].id);
+            printf(" Nome: %s\n", pratos[i].nome);
+            printf(" Preco: %.2f\n", pratos[i].preco);
+            printf(" Disponibilidade: %d\n", pratos[i].disponibilidade);
             printf("+----------------------------------------+\n");
         }
+
+        free(pratos);
+        
         printf("| 1. Voltar                              |\n");
         printf("+----------------------------------------+\n");
         printf("Escolha um opcao: ");
@@ -478,7 +572,7 @@ void relatorios() {
 
         switch(opcao) {
             case 1: relatorioVendas(); break;
-            case 2: relatorioEstoque(); break;
+            case 2: relatorioEstoque("pratos.txt"); break;
             case 3: break;
             default: 
                 printf("+------------------------------------------+\n");   
@@ -526,7 +620,7 @@ int main() {
                     scanf("%d", &opcao);
                     switch (opcao) {
                         case 1: cadastrarCliente(); break;
-                        case 2: listarClientes(); break;
+                        case 2: listarClientes("clientes.txt"); break;
                         case 3: consultarCliente(); break;
                         case 4: desativarCliente(); break;
                         case 5: excluirCliente(); break;
@@ -548,7 +642,7 @@ int main() {
                     scanf("%d", &opcao);
                     switch (opcao) {
                         case 1: cadastrarPrato(); break;
-                        case 2: consultarDisponibilidadePratos(); break;
+                        case 2: consultarDisponibilidadePratos("pratos.txt"); break;
                         default: break;                        
                     }
                 } while (opcao != 3);

@@ -196,8 +196,7 @@ void consultarCliente() {
                 printf("Escolha uma opcao: ");
                 scanf("%d", &opcao);
                 break;
-            case 2:
-                break;
+            case 2: break;
             default:
                 system("cls");
                 printf("+-----------------------------------------+\n");
@@ -318,26 +317,53 @@ void excluirCliente() {
 }
 
 void cadastrarPrato() {
+    int opcao = 1;
     Prato prato;
-    FILE *arquivo = fopen("pratos.txt", "a");
-    if (arquivo == NULL) {
-        return;
-    }
 
-    system("cls");
-    printf("+-----------------------------------------+\n");
-    printf("|          Cadastrar Novo Prato           |\n");
-    printf("+-----------------------------------------+\n");
-    printf(" ID do Prato: ");
-    scanf("%d", &prato.id);
-    printf(" Nome do Prato: ");
-    scanf("%s", prato.nome);
-    printf(" Preco do Prato: ");
-    scanf("%f", &prato.preco);
-    prato.disponibilidade = 1;
+    do {
+        FILE *arquivo = fopen("pratos.txt", "a");
+        if (arquivo == NULL) {
+            return;
+        }
 
-    fprintf(arquivo, "%d %s %.2f %d\n", prato.id, prato.nome, prato.preco, prato.disponibilidade);
-    fclose(arquivo);
+        switch (opcao) {
+            case 1:
+                system("cls");
+                printf("+-----------------------------------------+\n");
+                printf("|          Cadastrar Novo Prato           |\n");
+                printf("+-----------------------------------------+\n");
+                printf(" ID do Prato: ");
+                scanf("%d", &prato.id);
+                printf(" Nome do Prato: ");
+                scanf("%s", prato.nome);
+                printf(" Preco do Prato: ");
+                scanf("%f", &prato.preco);
+                prato.disponibilidade = 1;
+                fprintf(arquivo, "%d %s %.2f %d\n", prato.id, prato.nome, prato.preco, prato.disponibilidade);
+
+                system("cls");
+                printf("+-----------------------------------------+\n");
+                printf("|      Prato Cadastrado com Sucesso!      |\n");
+                printf("+-----------------------------------------+\n");
+                printf("| 1. Cadastrar Novo Prato                 |\n");
+                printf("| 2. Voltar                               |\n");
+                printf("+-----------------------------------------+\n");
+                printf("Escolha uma opcao: ");
+                scanf("%d", &opcao);
+                break;
+            case 2: break;
+            default:
+                system("cls");
+                printf("+-----------------------------------------+\n");
+                printf("| 1. Cadastrar Novo Prato                 |\n");
+                printf("| 2. Voltar                               |\n");
+                printf("+-----------------------------------------+\n");
+                printf("Escolha uma opcao: ");
+                scanf("%d", &opcao);    
+                break;           
+        }
+        fclose(arquivo);
+    } while (opcao != 2);
 }
 
 void registrarPedido() {
@@ -547,7 +573,7 @@ void relatorioEstoque(const char* filename) {
         }
 
         free(pratos);
-        
+
         printf("| 1. Voltar                              |\n");
         printf("+----------------------------------------+\n");
         printf("Escolha um opcao: ");

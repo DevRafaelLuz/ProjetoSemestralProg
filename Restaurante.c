@@ -186,6 +186,7 @@ void consultarCliente() {
                         printf(" Nome: %s\n", cliente.nome);
                         printf(" Telefone: %s\n", cliente.telefone);
                         printf(" CPF: %s\n", cliente.cpf);
+                        printf(" Ativo: %d\n", cliente.ativo);
                         break;
                     }
                 }
@@ -218,6 +219,7 @@ void desativarCliente() {
 
     do {
         FILE *arquivo = fopen("clientes.txt", "r+");
+        FILE *temp = fopen("temp.txt", "w");
 
         if (arquivo == NULL) {
             return;
@@ -235,10 +237,8 @@ void desativarCliente() {
                 while (fscanf(arquivo, "%d %s %s %s %d\n", &cliente.id, cliente.nome, cliente.telefone, cliente.cpf, &cliente.ativo) != EOF) {
                     if (cliente.id == id) {
                         cliente.ativo = 0;
-                        fseek(arquivo, -sizeof(Cliente), SEEK_CUR);
-                        fprintf(arquivo, "%d %s %s %s %d\n", cliente.id, cliente.nome, cliente.telefone, cliente.cpf, cliente.ativo);
-                        return;
                     }
+                    fprintf(temp, "%d %s %s %s %d\n", cliente.id, cliente.nome, cliente.telefone, cliente.cpf, cliente.ativo);
                 }
                 printf("+-----------------------------------------+\n");
                 printf("| 1. Desativar outro Cliente              |\n");
@@ -261,6 +261,9 @@ void desativarCliente() {
         }
         
         fclose(arquivo);
+        fclose(temp);
+        remove("clientes.txt");
+        rename("temp.txt", "clientes.txt");
     } while (opcao != 2);
 }
 

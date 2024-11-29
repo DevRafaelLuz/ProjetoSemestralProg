@@ -161,7 +161,8 @@ void listarClientes(const char* filename) {
 }
 
 void consultarCliente() {
-    int id, opcao = 1;
+    int opcao = 1;
+    char cpf[11];
     Cliente cliente;
     do {
         FILE *arquivo = fopen("clientes.txt", "r");
@@ -176,12 +177,12 @@ void consultarCliente() {
                 printf("+-----------------------------------------+\n");
                 printf("|            Consultar Cliente            |\n");
                 printf("+-----------------------------------------+\n");
-                printf("ID do Cliente: ");
-                scanf("%d", &id);
+                printf("CPF do Cliente: ");
+                scanf("%s", cpf);
 
                 printf("+-----------------------------------------+\n");
                 while (fscanf(arquivo, "%d %s %s %s %d\n", &cliente.id, cliente.nome, cliente.telefone, cliente.cpf, &cliente.ativo) != EOF) {
-                    if (cliente.id == id && cliente.ativo) {
+                    if (strcmp(cliente.cpf, cpf) == 0 && cliente.ativo) {
                         printf(" ID: %d\n", cliente.id);
                         printf(" Nome: %s\n", cliente.nome);
                         printf(" Telefone: %s\n", cliente.telefone);

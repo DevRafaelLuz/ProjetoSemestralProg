@@ -1,3 +1,8 @@
+# Integrantes
+- Maick Oliveira Lao
+- Rafael Gonçalves da Luz
+> Link do vídeo: https://youtu.be/OlR64NLH3F4
+
 # 👨🏻‍💻 Projeto semestral
 Este projeto visa criar um Sistema de Gestão de Restaurante.
 
